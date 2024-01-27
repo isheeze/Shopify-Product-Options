@@ -1,0 +1,177 @@
+{% liquid
+if block.settings.include_tags == blank
+    assign show = true
+else
+    assign show = false
+    assign include_tags = block.settings.include_tags | split: ','
+    for tag in include_tags
+        assign t = tag | strip
+        if block.settings.product.tags contains t
+            assign show = true
+        endif
+    endfor
+endif
+assign exclude_tags = block.settings.exclude_tags | split: ','
+for tag in exclude_tags
+  if block.settings.product.tags contains tag
+      assign show = false
+  endif
+endfor
+assign v = ''
+if block.settings.values != blank
+    assign values = block.settings.values | newline_to_br | split: '<br />'
+    for value in values
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign values = v | split: ','
+    assign v = ''
+endif
+if block.settings.checked != blank
+    assign checked = block.settings.checked | newline_to_br | split: '<br />'
+    for value in checked
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign checked = v | split: ',' 
+    assign v = ''
+endif
+if block.settings.rules != blank
+    assign rules = block.settings.rules | newline_to_br | split: '<br />'
+    for value in rules
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign rules = v | split: ','
+    assign v = ''
+endif %}
+{%- if show -%}
+<div class="tadabbur-app-block-prod-list" data-tadabbur-app-title="{{ block.settings.name }}">
+  {% if block.settings.name != blank %}<h2 class="h6">{{ block.settings.name }}: <span>{{ block.settings.value }}</span></h2>{% endif %}
+  {% if block.settings.product_list != blank %}
+    <div class="tadabbur-app-{{ block.id }}-block">
+      {% for product in block.settings.product_list %}
+        <a href="{{ product.url }}" class="opt-label opt-label--btn btn m-0">
+            <span class="flex-auto">
+                <img src="{{- product.featured_image | image_url -}}"
+                alt="{{ product.title }}" loading="lazy" width="100" height="100"/>
+            </span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+<style>
+  .tadabbur-app-block-prod-list .opt-label{
+    padding: {{ block.settings.padding }}px !important;
+    border-radius: {{ block.settings.border-radius-border }}px !important;
+    width: {{ block.settings.width }}px !important;
+    height: {{ block.settings.height }}px !important; 
+  }
+  .tadabbur-app-block-prod-list .opt-label:not([data-swatch]):hover:after{
+    border-radius: {{ block.settings.border-radius-border }}px !important;
+  }
+  .tadabbur-app-block-prod-list .opt-label img{
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    border-radius: {{ block.settings.border-radius-img }}px !important;
+  }
+</style>
+{% endif %}
+{% schema %}
+{
+  "name": "Linked Products",
+  "target": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+    "type": "product", "id": "product", "label": "product", "autofill": true
+    },
+    {
+        "type": "text",
+        "id": "name",
+        "label": "Title",
+        "default": "Linked Products"
+    },
+    {
+        "type": "text",
+        "id": "value",
+        "label": "Value",
+        "info": "You can select metafield from dynamic resource."
+    },
+    {
+        "type": "product_list",
+        "id": "product_list",
+        "label": "Products",
+        "info": "You can select metafield from dynamic resource."
+    },
+    {
+        "type": "header",
+        "content": "Style"
+    },
+    {
+        "type": "range",
+        "id": "padding",
+        "label": "Gap between Image and border",
+        "default": 4,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "range",
+        "id": "border-radius-border",
+        "label": "Border Radius of Border",
+        "default": 20,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "range",
+        "id": "border-radius-img",
+        "label": "Border Radius of Image",
+        "default": 15,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "number",
+        "id": "width",
+        "label": "Width",
+        "default": 80
+    },
+    {
+        "type": "number",
+        "id": "height",
+        "label": "Height",
+        "default": 80
+    },
+    {
+        "type": "text",
+        "id": "include_tags",
+        "label": "Include on tags",
+        "info": "This block will only display for those products which will have these tags. Leave empty and this will show on all products. Please write comma seperated list without any extra space"
+    },
+    {
+        "type": "text",
+        "id": "exclude_tags",
+        "label": "Exclude on tags",
+        "info": "This block will not display for those products which will have these tags. Please write comma seperated list without any extra space"
+    }
+  ]
+}
+{% endschema %}

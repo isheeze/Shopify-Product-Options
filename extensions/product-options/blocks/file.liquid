@@ -1,0 +1,164 @@
+{% liquid
+if block.settings.include_tags == blank
+    assign show = true
+else
+    assign show = false
+    assign include_tags = block.settings.include_tags | split: ','
+    for tag in include_tags
+        assign t = tag | strip
+        if block.settings.product.tags contains t
+            assign show = true
+        endif
+    endfor
+endif
+assign exclude_tags = block.settings.exclude_tags | split: ','
+for tag in exclude_tags
+  if block.settings.product.tags contains tag
+      assign show = false
+  endif
+endfor
+assign v = ''
+if block.settings.values != blank
+    assign values = block.settings.values | newline_to_br | split: '<br />'
+    for value in values
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign values = v | split: ','
+    assign v = ''
+endif
+if block.settings.checked != blank
+    assign checked = block.settings.checked | newline_to_br | split: '<br />'
+    for value in checked
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign checked = v | split: ',' 
+    assign v = ''
+endif
+if block.settings.rules != blank
+    assign rules = block.settings.rules | newline_to_br | split: '<br />'
+    for value in rules
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign rules = v | split: ','
+    assign v = ''
+endif %}
+{%- if show -%}
+<div class="tadabbur-app-block-swatch" data-tadabbur-app-title="{{ block.settings.name }}">
+  {% if block.settings.name != blank %}<h2 class="h6">{{ block.settings.name }}</h2>{% endif %}
+  <div
+    id="drop_zone_{{ block.id }}"
+    ondrop="dropHandler(event);"
+    ondragover="dragOverHandler(event);">
+    <p>Drop your file <i>Here</i> or <b>Browse</b>.</p>
+  </div>
+</div>
+<script>
+function dropHandler(ev) {
+
+  ev.preventDefault();
+
+  if (ev.dataTransfer.items) {
+    [...ev.dataTransfer.items].forEach((item, i) => {
+      if (item.kind === "file") {
+        const file = item.getAsFile();
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.querySelector('#tadabbur-app-{{ block.id }}-file').files = dataTransfer.files;
+      }
+    });
+  } else {
+    [...ev.dataTransfer.files].forEach((file, i) => {
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        document.querySelector('#tadabbur-app-{{ block.id }}-file').files = dataTransfer.files;
+    });
+  }
+}
+function dragOverHandler(ev) {
+  ev.preventDefault();
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+    let cbs = document.querySelectorAll('input[name="properties[{{ block.settings.name }}]"]');
+    let el = document.createElement('input')
+      el.setAttribute('id',"tadabbur-app-{{ block.id }}-file")
+      el.setAttribute("name","properties[{{ block.settings.name }}]")
+      el.setAttribute("type","file")
+    document.querySelector('.js-product-form-main').append(el)
+
+    let dropZone = document.querySelector("#drop_zone_{{ block.id }}")
+    dropZone.addEventListener('click',()=>{
+        document.querySelector('#tadabbur-app-{{ block.id }}-file').click()
+    })
+});
+</script>
+<style>
+#drop_zone_{{ block.id }} {
+    border: 2px dashed #0000008f;
+    width: 100%;
+    height: 100px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#drop_zone_{{ block.id }} p{
+    margin: 0px;
+}
+#tadabbur-app-{{ block.id }}-file{
+    display: none;
+}
+</style>
+{%- endif -%}
+{% schema %}
+    {
+      "name": "File",
+      "target": "section",
+      "enabled_on": {
+        "templates": ["product"]
+      },
+      "settings": [
+        {
+          "type": "product", "id": "product", "label": "product", "autofill": true
+        },
+        {
+            "type": "text",
+            "id": "name",
+            "label": "Title",
+            "default": "File"
+        },
+        {
+            "type": "checkbox",
+            "id": "fullwidth",
+            "label": "Full Width",
+            "default": true
+        },
+        {
+            "type": "text",
+            "id": "include_tags",
+            "label": "Include on tags",
+            "info": "This block will only display for those products which will have these tags. Leave empty and this will show on all products. Please write comma seperated list without any extra space"
+        },
+        {
+            "type": "text",
+            "id": "exclude_tags",
+            "label": "Exclude on tags",
+            "info": "This block will not display for those products which will have these tags. Please write comma seperated list without any extra space"
+        }
+      ]
+    }
+{% endschema %}

@@ -1,0 +1,243 @@
+{% liquid
+assign v = ''
+assign imgs = block.settings.imgs | newline_to_br | split: '<br />'
+for value in imgs
+  unless forloop.index0 == 0
+    assign v = v | append: ','
+  endunless
+  assign t = value | strip
+  assign v = v | append: t
+endfor
+assign imgs = v | split: ','
+
+if block.settings.include_tags == blank
+    assign show = true
+else
+    assign show = false
+    assign include_tags = block.settings.include_tags | split: ','
+    for tag in include_tags
+        assign t = tag | strip
+        if block.settings.product.tags contains t
+            assign show = true
+        endif
+    endfor
+endif
+assign exclude_tags = block.settings.exclude_tags | split: ','
+for tag in exclude_tags
+  if block.settings.product.tags contains tag
+      assign show = false
+  endif
+endfor
+assign v = ''
+if block.settings.values != blank
+    assign values = block.settings.values | newline_to_br | split: '<br />'
+    for value in values
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign values = v | split: ','
+    assign v = ''
+endif
+if block.settings.checked != blank
+    assign checked = block.settings.checked | newline_to_br | split: '<br />'
+    for value in checked
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign checked = v | split: ',' 
+    assign v = ''
+endif
+if block.settings.rules != blank
+    assign rules = block.settings.rules | newline_to_br | split: '<br />'
+    for value in rules
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign rules = v | split: ','
+    assign v = ''
+endif %}
+  
+{%- if show -%}
+<div class="tadabbur-app-block-swatch" data-tadabbur-app-title="{{ block.settings.name }}">
+  {% if block.settings.name != blank %}<h2 class="h6">{{ block.settings.name }}</h2>{% endif %}
+  {% if block.settings.values != blank %}
+    <div class="tadabbur-app-{{ block.id }}-block">
+      {% for value in values %}
+        <input type="radio"
+          class="tbi visually-hidden focus-label-before opt-btn"
+          id="tadabbur-app-{{ block.id }}-radio-{{ forloop.index }}"
+          name="properties[{{ block.settings.name }}]"
+          value="{{ value }}"
+          {% if value == block.settings.checked %}checked{% endif %}
+        >
+        <label for="tadabbur-app-{{ block.id }}-radio-{{ forloop.index }}" class="opt-label opt-label--btn btn m-0">
+            <span class="flex-auto">
+                <img src="{%- if block.settings.assets -%}
+                        {{- imgs[forloop.index0] | asset_img_url -}}
+                    {%- else -%}
+                        {{- imgs[forloop.index0] | file_img_url -}}
+                    {%- endif -%}"
+                alt="{{ value }}" loading="lazy" width="100" height="100"/>
+            </span>
+        </label>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+<style>
+  .tadabbur-app-block-swatch .opt-label{
+    padding: {{ block.settings.padding }}px !important;
+    border-radius: {{ block.settings.border-radius-border }}px !important;
+    width: {{ block.settings.width }}px !important;
+    height: {{ block.settings.height }}px !important; 
+  }
+  .tadabbur-app-block-swatch .opt-btn:checked+.opt-label:not(.opt-label--swatch):after,
+  .tadabbur-app-block-swatch .opt-label:not([data-swatch]):hover:after{
+    border-radius: {{ block.settings.border-radius-border }}px !important;
+  }
+  .tadabbur-app-block-swatch .opt-label img{
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    border-radius: {{ block.settings.border-radius-img }}px !important;
+  }
+</style>
+<script src="{{ 'javascript.js' | asset_url }}" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  {%- comment -%}
+    first argument of add_value_to_cart and haveRules should be true for checkbox, radio and swatches
+  {%- endcomment -%}
+  {% if block.settings.add_value_to_cart %}
+    add_value_to_cart(true, '{{ block.id }}', '{{ block.settings.name }}')
+  {%- endif -%}
+  {% if block.settings.rules != blank %}
+    haveRules(true, '{{ block.id }}', '{{ block.settings.name }}', [{% for rule in rules %}{% unless forloop.index0 == 0 %},{% endunless %}'{{ rule }}'{% endfor %}])
+  {%- endif -%}
+})
+</script>
+{% endif %}
+{% schema %}
+{
+  "name": "Swatches",
+  "target": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+    "type": "product", "id": "product", "label": "product", "autofill": true
+    },
+    {
+        "type": "text",
+        "id": "name",
+        "label": "Title",
+        "default": "Swatches"
+    },
+    {
+        "type": "textarea",
+        "id": "values",
+        "label": "Swatch Values",
+        "info": "Write one value in one line and next in other",
+        "default": "swatch1\nswatch2\nswatch3"
+    },
+    {
+        "type": "textarea",
+        "id": "imgs",
+        "label": "Respective Images",
+        "info": "Upload the image to files or assets folder of theme and write name of images respective to above swatch",
+        "default": "image1.png\nimage2.png\nimage3.png"
+    },
+    {
+        "type": "checkbox",
+        "id": "assets",
+        "label": "Images from assets",
+        "info": "If above images are from assets folder of theme check this, or else these images should be in files.",
+        "default": false
+    },
+    {
+        "type": "text",
+        "id": "checked",
+        "label": "Selected Swatch",
+        "info": "Write Radio's value from above which should be checked by default",
+        "default": "swatch2"
+    },
+    {
+        "type": "header",
+        "content": "Style"
+    },
+    {
+        "type": "range",
+        "id": "padding",
+        "label": "Gap between Image and border",
+        "default": 4,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "range",
+        "id": "border-radius-border",
+        "label": "Border Radius of Border",
+        "default": 20,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "range",
+        "id": "border-radius-img",
+        "label": "Border Radius of Image",
+        "default": 15,
+        "min": 0,
+        "max": 100,
+        "step": 1
+    },
+    {
+        "type": "number",
+        "id": "width",
+        "label": "Width",
+        "default": 80
+    },
+    {
+        "type": "number",
+        "id": "height",
+        "label": "Height",
+        "default": 80
+    },
+    {
+        "type": "checkbox",
+        "id": "add_value_to_cart",
+        "label": "Attach it's value to order",
+        "default": true
+    },
+    {
+        "type": "textarea",
+        "id": "rules",
+        "label": "Custom Logic Rules",
+        "info": "One rule in one line. If two block's rules effect one block, The rule that is applied last in the cascade will take effect. If this block's value is [value], then the block [Title] will be displayed. To hide the block, Use -x instead of ->. [value] -> [Title of block]"
+    },
+    {
+        "type": "text",
+        "id": "include_tags",
+        "label": "Include on tags",
+        "info": "This block will only display for those products which will have these tags. Leave empty and this will show on all products. Please write comma seperated list without any extra space"
+    },
+    {
+        "type": "text",
+        "id": "exclude_tags",
+        "label": "Exclude on tags",
+        "info": "This block will not display for those products which will have these tags. Please write comma seperated list without any extra space"
+    }
+  ]
+}
+{% endschema %}

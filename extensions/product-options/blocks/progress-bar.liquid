@@ -1,0 +1,77 @@
+{% liquid
+assign v = ''
+assign points = block.settings.points | newline_to_br | split: '<br />'
+for value in points
+  unless forloop.index0 == 0
+    assign v = v | append: ','
+  endunless
+  assign t = value | strip
+  assign v = v | append: t
+endfor
+assign points = v | split: ',' %}
+<div class="tadabbur-app-block-progress-bar-container free-shipping-container color-scheme color-scheme--2">
+    <div class="tadabbur-app-block-progress-bar">
+        <div class="bar-bg">
+            <div class="bar-progress"></div>
+            {% for p in points %}
+            {% assign point = p | split: '->' %}
+            <div class="bar-point" data-price="{{ point }}" data-cart="{{ cart.original_total_price }}">
+                <div class="point-price">{{ point[0] | money }}</div>
+                <div class="bar-pin"></div>
+                <div class="point-label">{{ point[1] }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<style>
+    .tadabbur-app-block-progress-bar{
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+    }
+    .bar-bg{
+        width: 100%;
+        height: 10px;
+        background: #ffffff33;
+        border-radius: 10px;
+        position: relative;
+    }
+    .bar-progress{
+        height: 100%;
+        width: 50%;
+        background: white;
+        border-radius: 10px;
+    }
+    .bar-point{
+        position: absolute;
+        text-align: center;
+        top: -24px;
+        transform: translateX(-50%);
+        left: 50%;
+    }
+    .bar-pin{
+        height: 10px;
+        width: 1px;
+        background: black;
+        margin: auto;
+    }
+</style>
+<script>    
+    document.querySelector('.cart-drawer__content').prepend(document.querySelector('.tadabbur-app-block-progress-bar-container'))
+</script>
+{% schema %}
+{
+    "name": "Progress Bar",
+    "target": "body",
+    "settings": [
+        {
+            "type": "textarea",
+            "id": "points",
+            "label": "Points",
+            "info": "Write one point in one line and next in other syntax (price -> label)",
+            "default": "1000 -> Free Shipping"
+        }
+    ]
+}
+{% endschema %}

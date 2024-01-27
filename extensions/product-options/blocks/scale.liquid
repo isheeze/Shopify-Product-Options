@@ -1,0 +1,178 @@
+{%- liquid
+  if block.settings.include_tags == blank
+    assign show = true
+  else
+    assign show = false
+    assign include_tags = block.settings.include_tags | split: ','
+    for tag in include_tags
+      assign t = tag | strip
+      if block.settings.product.tags contains t
+        assign show = true
+      endif
+    endfor
+  endif
+  
+  assign exclude_tags = block.settings.exclude_tags | split: ','
+  for tag in exclude_tags
+    assign t = tag | strip
+    if block.settings.product.tags contains t
+      assign show = false
+    endif
+  endfor
+  
+  assign scale = block.settings.scale-value -%}
+  
+  {%- if show -%}
+  <div class="tadabbur-app-block-scale" data-tadabbur-app-title="{{ block.settings.title }}">
+    {% if block.settings.title != blank %}<h2 class="h6">{{ block.settings.title }}</h2>{% endif %}
+    {% if block.settings.text != blank %}<p>{{ block.settings.text }}</p>{% endif %}
+    <div class="scale-bar">
+      <div class="scale-pointer"></div>
+    </div>
+    <div class="scale-label-container">
+      {% if block.settings.scale-step-label-1 != blank %}<div>{{ block.settings.scale-step-label-1 }}</div>{% endif %}
+      {% if block.settings.scale-step-label-2 != blank %}<div>{{ block.settings.scale-step-label-2 }}</div>{% endif %}
+      {% if block.settings.scale-step-label-3 != blank %}<div>{{ block.settings.scale-step-label-3 }}</div>{% endif %}
+      {% if block.settings.scale-step-label-4 != blank %}<div>{{ block.settings.scale-step-label-4 }}</div>{% endif %}
+    </div>
+  </div>
+  
+  <style>
+    .tadabbur-app-block-scale .scale-bar{
+      width: 100%;
+      height: {{ block.settings.height }}px;
+      background: {{ block.settings.bg-color }};
+      border-radius: 50px;
+      position: relative;
+      padding: 0px {{ block.settings.height | divided_by: 2 }}px;
+      display: flex;
+      align-items: center;
+    }
+    .tadabbur-app-block-scale .scale-pointer{
+      display: block !important;
+      height: calc(100% - 2px);
+      aspect-ratio: 1;
+      background: {{ block.settings.pointer-color }};
+      border-radius: 50%;
+      margin-left: calc({{ scale }}% - {{ block.settings.height | divided_by: 2 }}px);
+      box-shadow: 0px 0px 3px -1px;
+    }
+    .tadabbur-app-block-scale .scale-label-container{
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+  {%- endif -%}
+  {% schema %}
+  {
+    "name": "Scale",
+    "target": "section",
+    "enabled_on": {
+      "templates": ["product"]
+    },
+    "settings": [
+      {
+        "type": "product", "id": "product", "label": "product", "autofill": true
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Title",
+        "default": "Title"
+      },
+      {
+        "type": "richtext",
+        "id": "text",
+        "label": "Text"
+      },
+      {
+        "type": "text",
+        "id": "scale-value",
+        "label": "Scale Value",
+        "info": "Write a number between 0 and 100",
+        "default": "10"
+      },
+      {
+        "type": "header",
+        "content": "STEP 1"
+      },
+      {
+        "type": "text",
+        "id":"scale-step-label-1",
+        "label": "Scale Step Label",
+        "default": "step 1"
+      },
+      {
+        "type": "header",
+        "content": "STEP 2"
+      },
+      {
+        "type": "text",
+        "id":"scale-step-label-2",
+        "label": "Scale Step Label",
+        "default": "step 2"
+      },
+      {
+        "type": "header",
+        "content": "STEP 3"
+      },
+      {
+        "type": "text",
+        "id":"scale-step-label-3",
+        "label": "Scale Step Label"
+      },
+      {
+        "type": "header",
+        "content": "STEP 4"
+      },
+      {
+        "type": "text",
+        "id":"scale-step-label-4",
+        "label": "Scale Step Label"
+      },
+      {
+        "type": "header",
+        "content": "Styles"
+      },
+      {
+        "type": "range",
+        "min": 0,
+        "max": 100,
+        "default": 10,
+        "step": 1,
+        "id": "height",
+        "label": "Thickness"
+      },
+      {
+        "type": "text",
+        "id": "bg-color",
+        "label": "Background Color",
+        "info": "You can write color code in any formate HEX, RGB, Gradiant etc",
+        "default": "linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%)"
+      },
+      {
+        "type": "text",
+        "id": "pointer-color",
+        "label": "Pointer's Color",
+        "info": "You can write color code in any formate HEX, RGB, Gradiant etc",
+        "default": "white"
+      },
+      {
+        "type": "text",
+        "id": "include_tags",
+        "label": "Include on tags",
+        "info": "This range will only display for those products which will have these tags. Leave empty and this will show on all products. Please write comma seperated list without any extra space"
+      },
+      {
+        "type": "text",
+        "id": "exclude_tags",
+        "label": "Exclude on tags",
+        "info": "This range will not display for those products which will have these tags. Please write comma seperated list without any extra space"
+      }
+    ]
+  }
+  {% endschema %}
+  
+  

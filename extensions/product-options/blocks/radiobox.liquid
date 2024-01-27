@@ -1,0 +1,173 @@
+{% liquid
+if block.settings.include_tags == blank
+    assign show = true
+else
+    assign show = false
+    assign include_tags = block.settings.include_tags | split: ','
+    for tag in include_tags
+        assign t = tag | strip
+        if block.settings.product.tags contains t
+            assign show = true
+        endif
+    endfor
+endif
+assign exclude_tags = block.settings.exclude_tags | split: ','
+for tag in exclude_tags
+  if block.settings.product.tags contains tag
+      assign show = false
+  endif
+endfor
+assign v = ''
+if block.settings.values != blank
+    assign values = block.settings.values | newline_to_br | split: '<br />'
+    for value in values
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign values = v | split: ','
+    assign v = ''
+endif
+if block.settings.checked != blank
+    assign checked = block.settings.checked | newline_to_br | split: '<br />'
+    for value in checked
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign checked = v | split: ',' 
+    assign v = ''
+endif
+if block.settings.rules != blank
+    assign rules = block.settings.rules | newline_to_br | split: '<br />'
+    for value in rules
+        unless forloop.index0 == 0
+            assign v = v | append: ','
+        endunless
+        assign t = value | strip
+        assign v = v | append: t
+    endfor
+    assign rules = v | split: ','
+    assign v = ''
+endif %}
+{%- if show -%}
+<div>
+  <div class="tadabbur-app-block-radio" data-tadabbur-app-title="{{ block.settings.name }}">
+    {% if block.settings.name != blank %}<h2 class="h6">{{ block.settings.name }}</h2>{% endif %}
+    {% if block.settings.values != blank %}
+      <div class="tadabbur-app-{{ block.id }}-block">
+        {% for value in values %}
+        <div>
+          <input type="radio"
+            class="tbi visually-hidden focus-label-before{% if block.settings.buttons %} opt-btn{% else %} radio{% endif %}"
+            id="tadabbur-app-{{ block.id }}-radio-{{ forloop.index }}"
+            name="properties[{{ block.settings.name }}]"
+            value="{{ value }}"
+            {% if value == block.settings.checked %}checked{% endif %}
+          >
+          <label for="tadabbur-app-{{ block.id }}-radio-{{ forloop.index }}" class="{% if block.settings.buttons %}opt-label opt-label--btn btn {% endif %}filter__label flex items-start w-full m-0">
+            <span class="flex-auto">{{ value }}</span>
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+<style>
+  .tadabbur-app-{{ block.id }}-block{
+    column-count: {{ block.settings.col }};
+  }
+</style>
+<script src="{{ 'javascript.js' | asset_url }}" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  {%- comment -%}
+    first argument of add_value_to_cart and haveRules should be true for checkbox, radio and swatches
+  {%- endcomment -%}
+  {% if block.settings.add_value_to_cart %}
+    add_value_to_cart(true, '{{ block.id }}', '{{ block.settings.name }}')
+  {%- endif -%}
+  {% if block.settings.rules != blank %}
+    haveRules(true, '{{ block.id }}', '{{ block.settings.name }}', [{% for rule in rules %}{% unless forloop.index0 == 0 %},{% endunless %}'{{ rule }}'{% endfor %}])
+  {%- endif -%}
+})
+</script>
+{% endif %}
+{% schema %}
+{
+  "name": "Radio",
+  "target": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+    "type": "product", "id": "product", "label": "product", "autofill": true
+    },
+    {
+        "type": "text",
+        "id": "name",
+        "label": "Title",
+        "default": "Radio Box"
+    },
+    {
+        "type": "range",
+        "id": "col",
+        "label": "How many in one row",
+        "min": 1,
+        "max": 4,
+        "step": 1,
+        "default": 2
+    },
+    {
+        "type": "checkbox",
+        "id": "buttons",
+        "label": "Buttons style",
+        "default": false
+    },
+    {
+        "type": "textarea",
+        "id": "values",
+        "label": "Radio Buttons",
+        "info": "Write one Radio button's value in one line and next in other",
+        "default": "radio1\nradio2\nradio3"
+    },
+    {
+        "type": "text",
+        "id": "checked",
+        "label": "checked Radio",
+        "info": "Write Radio's value from above which should be checked by default",
+        "default": "radio2"
+    },
+    {
+        "type": "checkbox",
+        "id": "add_value_to_cart",
+        "label": "Attach it's value to order",
+        "default": true
+    },
+    {
+        "type": "textarea",
+        "id": "rules",
+        "label": "Custom Logic Rules",
+        "info": "One rule in one line. If two block's rules effect one block, The rule that is applied last in the cascade will take effect. If this block's value is [value], then the block [Title] will be displayed. To hide the block, Use -x instead of ->. [value] -> [Title of block]"
+    },
+    {
+        "type": "text",
+        "id": "include_tags",
+        "label": "Include on tags",
+        "info": "This block will only display for those products which will have these tags. Leave empty and this will show on all products. Please write comma seperated list without any extra space"
+    },
+    {
+        "type": "text",
+        "id": "exclude_tags",
+        "label": "Exclude on tags",
+        "info": "This block will not display for those products which will have these tags. Please write comma seperated list without any extra space"
+    }
+  ]
+}
+{% endschema %}

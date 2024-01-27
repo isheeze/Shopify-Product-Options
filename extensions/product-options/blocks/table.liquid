@@ -1,0 +1,337 @@
+{%- liquid
+if block.settings.include_tags == blank
+  assign show = true
+else
+  assign show = false
+  assign include_tags = block.settings.include_tags | split: ','
+  for tag in include_tags
+      if block.settings.product.tags contains tag
+          assign show = true
+      endif
+  endfor
+endif
+
+assign exclude_tags = block.settings.exclude_tags | split: ','
+for tag in exclude_tags
+  if block.settings.product.tags contains tag
+      assign show = false
+  endif
+endfor -%}
+
+{%- if show -%}
+<div class="tadabbur-app-block-table" data-tadabbur-app-title="{{ block.settings.heading }}">
+{%- if block.settings.heading != blank -%}<h2 class="h6">{{ block.settings.heading }}</h2>{%- endif -%}
+  {%- if block.settings.col-values1 != blank or block.settings.col-values2 != blank or block.settings.col-values3 != blank or block.settings.col-values4 != blank or block.settings.col-values5 != blank -%}
+  <table>
+      
+      {%- if block.settings.col-values1 != blank -%}
+        {%- liquid 
+        if block.settings.row-header1
+            assign tag = 'th'
+        else
+            assign tag = 'td'
+        endif
+        assign values = block.settings.col-values1 | split: ',' -%}
+          <tr>
+              {%- if block.settings.row-name1 != blank -%}<{{ tag }} class="name"><div>{{ block.settings.row-name1 }}</div></{{ tag }}>{%- endif -%}
+              {%- for value in values -%}
+                  <{{ tag }}><div>{{ value | strip }}</div></{{ tag }}>
+              {%- endfor -%}
+          </tr>
+      {%- endif -%}
+      
+      {% if block.settings.col-values2 != blank %}
+        {%- liquid 
+        if block.settings.row-header2
+              assign tag = 'th'
+          else
+              assign tag = 'td'
+          endif
+          assign values = block.settings.col-values2 | split: ',' -%}
+          <tr>
+              {%- if block.settings.row-name2 != blank -%}<{{ tag }} class="name"><div>{{ block.settings.row-name2 }}</div></{{ tag }}>{%- endif -%}
+              {%- for value in values -%}
+                  <{{ tag }}><div>{{ value | strip }}</div></{{ tag }}>
+              {%- endfor -%}
+          </tr>
+      {%- endif -%}
+      
+      {% if block.settings.col-values3 != blank %}
+        {%- liquid
+        if block.settings.row-header3
+              assign tag = 'th'
+          else
+              assign tag = 'td'
+          endif
+          assign values = block.settings.col-values3 | split: ',' -%}
+          <tr>
+              {%- if block.settings.row-name3 != blank -%}<{{ tag }} class="name"><div>{{ block.settings.row-name3 }}</div></{{ tag }}>{%- endif -%}
+              {%- for value in values -%}
+                  <{{ tag }}><div>{{ value | strip }}</div></{{ tag }}>
+              {%- endfor -%}
+          </tr>
+      {%- endif -%}
+      
+      {% if block.settings.col-values4 != blank %}
+        {%- liquid
+        if block.settings.row-header4
+              assign tag = 'th'
+          else
+              assign tag = 'td'
+          endif
+          assign values = block.settings.col-values4 | split: ',' -%}
+          <tr>
+              {%- if block.settings.row-name4 != blank -%}<{{ tag }} class="name"><div>{{ block.settings.row-name4 }}</div></{{ tag }}>{%- endif -%}
+              {%- for value in values -%}
+                  <{{ tag }}><div>{{ value | strip }}</div></{{ tag }}>
+              {%- endfor -%}
+          </tr>
+      {%- endif -%}
+      
+      {% if block.settings.col-values5 != blank %}
+        {%- liquid
+        if block.settings.row-header5
+              assign tag = 'th'
+          else
+              assign tag = 'td'
+          endif
+          assign values = block.settings.col-values5 | split: ',' -%}
+          <tr>
+              {%- if block.settings.row-name5 != blank -%}<{{ tag }} class="name"><div>{{ block.settings.row-name5 }}</div></{{ tag }}>{%- endif -%}
+              {%- for value in values -%}
+                  <{{ tag }}><div>{{ value | strip }}</div></{{ tag }}>
+              {%- endfor -%}
+          </tr>
+      {%- endif -%}
+  </table>
+  {%- endif -%}
+{%- if block.settings.note != blank -%}<div class="note">{{ block.settings.note }}</div>{%- endif -%}
+</div>
+<style>
+  .tadabbur-app-block-table h2{
+      margin-bottom: {{ block.settings.top-spacing }}px !important;
+  }
+  .tadabbur-app-block-table .note > p:first-child{
+      margin-top: {{ block.settings.bottom-spacing }}px !important;
+  }
+  .tadabbur-app-block-table table {
+      box-shadow: none !important;
+      width: 100%;
+  }
+  .tadabbur-app-block-table table *{
+      border: none !important;
+  }
+
+  .tadabbur-app-block-table table tr:first-child > *:first-child {
+      border-top-left-radius: 10px;
+  }
+  .tadabbur-app-block-table table tr:last-child  > *:first-child {
+      border-bottom-left-radius: 10px;
+  }
+  .tadabbur-app-block-table table tr:first-child > *:last-child {
+      border-top-right-radius: 10px;
+  }
+  .tadabbur-app-block-table table tr:last-child > *:last-child {
+      border-bottom-right-radius: 10px;
+  }
+
+  
+  .tadabbur-app-block-table tr > *{
+      background-color: {{ block.settings.bg-color }} !important;
+      color: {{ block.settings.txt-color }} !important;
+      padding: 0px !important;
+  }
+  .tadabbur-app-block-table .name{
+      background: {{ block.settings.txt-color }} !important;
+      color: {{ block.settings.bg-color }} !important;
+  }
+
+  .tadabbur-app-block-table tr > * > div {
+      padding: 1rem;
+      border-bottom: 1px solid {{ block.settings.txt-color }} !important;
+      text-align: center;
+  }
+  .tadabbur-app-block-table tr > .name > div {
+      border-bottom: 1px solid {{ block.settings.bg-color }} !important;
+  }
+  .tadabbur-app-block-table table tr:last-child > * > div {
+      border-bottom: none !important;
+  }
+  .tadabbur-app-block-table tr > *:first-child > div {
+      margin-left: 2rem;
+      text-align: left;
+  }
+  .tadabbur-app-block-table tr > *:last-child > div {
+      margin-right: 2rem;
+  }
+</style>
+{%- endif -%}
+
+{% schema %}
+  {
+      "name": "Table",
+      "target": "section",
+      "enabled_on": {
+          "templates": ["product"]
+      },
+      "settings": [
+      {
+        "type": "product", "id": "product", "label": "product", "autofill": true
+      },
+      {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+      },
+      {
+          "type": "richtext",
+          "id": "note",
+          "label": "Note"
+      },
+      {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 10,
+          "id": "top-spacing",
+          "label": "Top Spacing"
+      },
+      {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "px",
+          "default": 10,
+          "id": "bottom-spacing",
+          "label": "bottom Spacing"
+      },
+      {
+          "type": "color",
+          "id": "bg-color",
+          "label": "Background Color",
+          "default": "#f9f3f1"
+      },
+      {
+          "type": "color",
+          "id": "txt-color",
+          "label": "Text Color",
+          "default": "#3a3a3e"
+      },
+      {
+          "type": "text",
+          "id": "include_tags",
+          "label": "Include on tags",
+          "info": "This block will only display for those products which will have these tags. Leave empty and this will show on all products. Please write comma seperated list without any extra space"
+      },
+      {
+          "type": "text",
+          "id": "exclude_tags",
+          "label": "Exclude on tags",
+          "info": "This block will not display for those products which will have these tags. Please write comma seperated list without any extra space"
+      },
+      {
+          "type": "header",
+          "content": "ROW 1"
+      },
+      {
+          "type": "checkbox",
+          "id": "row-header1",
+          "label": "This is a row header"
+      },
+      {
+          "type": "text",
+          "id": "row-name1",
+          "label": "Row name"
+      },
+      {
+          "type": "text",
+          "id": "col-values1",
+          "label": "Column Values",
+          "info": "Use commas without extra space to separate the value of each column(e.g. XS,S,M,L)"
+      },
+      {
+          "type": "header",
+          "content": "ROW 2"
+      },
+      {
+          "type": "checkbox",
+          "id": "row-header2",
+          "label": "This is a row header"
+      },
+      {
+          "type": "text",
+          "id": "row-name2",
+          "label": "Row name"
+      },
+      {
+          "type": "text",
+          "id": "col-values2",
+          "label": "Column Values",
+          "info": "Use commas without extra space to separate the value of each column(e.g. XS,S,M,L)"
+      },
+      {
+          "type": "header",
+          "content": "ROW 3"
+      },
+      {
+          "type": "checkbox",
+          "id": "row-header3",
+          "label": "This is a row header"
+      },
+      {
+          "type": "text",
+          "id": "row-name3",
+          "label": "Row name"
+      },
+      {
+          "type": "text",
+          "id": "col-values3",
+          "label": "Column Values",
+          "info": "Use commas without extra space to separate the value of each column(e.g. XS,S,M,L)"
+      },
+      {
+          "type": "header",
+          "content": "ROW 4"
+      },
+      {
+          "type": "checkbox",
+          "id": "row-header4",
+          "label": "This is a row header"
+      },
+      {
+          "type": "text",
+          "id": "row-name4",
+          "label": "Row name"
+      },
+      {
+          "type": "text",
+          "id": "col-values4",
+          "label": "Column Values",
+          "info": "Use commas without extra space to separate the value of each column(e.g. XS,S,M,L)"
+      },
+      {
+          "type": "header",
+          "content": "ROW 5"
+      },
+      {
+          "type": "checkbox",
+          "id": "row-header5",
+          "label": "This is a row header"
+      },
+      {
+          "type": "text",
+          "id": "row-name5",
+          "label": "Row name"
+      },
+      {
+          "type": "text",
+          "id": "col-values5",
+          "label": "Column Values",
+          "info": "Use commas without extra space to separate the value of each column(e.g. XS,S,M,L)"
+      }
+    ]
+  }
+{% endschema %}
